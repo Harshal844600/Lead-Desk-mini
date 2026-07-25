@@ -21,6 +21,7 @@ export const createLeadSchema = z.object({
     .trim()
     .min(10, "Message must be at least 10 characters")
     .max(1000, "Message must be under 1000 characters"),
+  turnstileToken: z.string().optional(),
 });
 
 export type CreateLeadInput = z.infer<typeof createLeadSchema>;

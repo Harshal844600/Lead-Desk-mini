@@ -3,6 +3,15 @@ import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/r
 import { renderErrorPage } from "./lib/error-page";
 import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
 
+if (typeof process !== "undefined" && process.versions && process.versions.node && process.env.VITE_SENTRY_DSN) {
+  import("@sentry/node").then((Sentry) => {
+    Sentry.init({
+      dsn: process.env.VITE_SENTRY_DSN,
+      tracesSampleRate: 1.0,
+    });
+  });
+}
+
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
     return await next();
@@ -11,6 +20,9 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
       throw error;
     }
     console.error(error);
+    if (typeof process !== "undefined" && process.versions && process.versions.node) {
+      import("@sentry/node").then((Sentry) => Sentry.captureException(error));
+    }
     return new Response(renderErrorPage(), {
       status: 500,
       headers: { "content-type": "text/html; charset=utf-8" },

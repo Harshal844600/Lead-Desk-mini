@@ -56,24 +56,34 @@ function Dashboard({ email }: { email: string | null }) {
   const updateStatus = useServerFn(updateLeadStatus);
   const qc = useQueryClient();
 
-  const { data: leads = [], isLoading, isError, refetch } = useQuery({
-    queryKey: ["leads"],
-    queryFn: () => fetchLeads(),
+  const [page, setPage] = useState(1);
+  const limit = 50;
+
+  const { data: response, isLoading, isError, refetch } = useQuery({
+    queryKey: ["leads", page],
+    queryFn: () => fetchLeads({ data: { page, limit } }),
   });
+
+  const leads = response?.leads ?? [];
+  const totalLeads = response?.total ?? 0;
 
   const mutation = useMutation({
     mutationFn: (vars: { id: string; status: LeadStatus }) =>
       updateStatus({ data: vars }),
     onMutate: async ({ id, status }) => {
-      await qc.cancelQueries({ queryKey: ["leads"] });
-      const prev = qc.getQueryData<Lead[]>(["leads"]);
-      qc.setQueryData<Lead[]>(["leads"], (old) =>
-        (old ?? []).map((l) => (l.id === id ? { ...l, status } : l)),
-      );
+      await qc.cancelQueries({ queryKey: ["leads", page] });
+      const prev = qc.getQueryData<{ leads: Lead[]; total: number }>(["leads", page]);
+      qc.setQueryData<{ leads: Lead[]; total: number }>(["leads", page], (old) => {
+        if (!old) return { leads: [], total: 0 };
+        return {
+          ...old,
+          leads: old.leads.map((l) => (l.id === id ? { ...l, status } : l)),
+        };
+      });
       return { prev };
     },
     onError: (err, _v, ctx) => {
-      if (ctx?.prev) qc.setQueryData(["leads"], ctx.prev);
+      if (ctx?.prev) qc.setQueryData(["leads", page], ctx.prev);
       toast.error(err instanceof Error ? err.message : "Update failed");
     },
     onSuccess: () => toast.success("Status updated"),
@@ -98,8 +108,8 @@ function Dashboard({ email }: { email: string | null }) {
   const stats = useMemo(() => {
     const by = { New: 0, Contacted: 0, Closed: 0 } as Record<LeadStatus, number>;
     for (const l of leads) by[l.status]++;
-    return { total: leads.length, ...by };
-  }, [leads]);
+    return { total: totalLeads, ...by }; // Display actual total from DB
+  }, [leads, totalLeads]);
 
   const exportCsv = () => {
     const header = ["id", "name", "email", "budget", "status", "message", "created_at"];
@@ -237,6 +247,28 @@ function Dashboard({ email }: { email: string | null }) {
             </div>
           )}
         </div>
+
+        {totalLeads > 0 && (
+          <div className="mt-6 flex items-center justify-between border-t border-border/50 pt-4">
+            <button
+              onClick={() => setPage((p) => p - 1)}
+              disabled={page === 1}
+              className="rounded-md border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-accent disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-muted-foreground">
+              Page {page} of {Math.max(1, Math.ceil(totalLeads / limit))}
+            </span>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page * limit >= totalLeads}
+              className="rounded-md border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-accent disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );

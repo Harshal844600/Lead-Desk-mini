@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ArrowRight, CheckCircle2, Sparkles, ShieldCheck, LineChart } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   BUDGET_RANGES,
   createLeadSchema,
@@ -29,9 +30,24 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+};
+
 function LandingPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background selection:bg-primary/30">
       <SiteHeader />
       <main>
         <Hero />
@@ -45,67 +61,90 @@ function LandingPage() {
 
 function SiteHeader() {
   return (
-    <header className="border-b border-border/60 bg-background/80 backdrop-blur">
+    <motion.header 
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="sticky top-0 z-50 border-b border-border/40 bg-background/60 backdrop-blur-xl"
+    >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link to="/" className="flex items-center gap-2 text-foreground">
-          <span className="grid size-8 place-items-center rounded-md bg-primary text-primary-foreground">
+        <Link to="/" className="flex items-center gap-2 text-foreground group">
+          <motion.span 
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-sm"
+          >
             <Sparkles className="size-4" />
-          </span>
+          </motion.span>
           <span className="text-lg font-semibold tracking-tight">LeadDesk</span>
         </Link>
-        <nav className="flex items-center gap-6 text-sm">
-          <a href="#features" className="text-muted-foreground hover:text-foreground">
+        <nav className="flex items-center gap-6 text-sm font-medium">
+          <a href="#features" className="text-muted-foreground transition-colors hover:text-foreground">
             Features
           </a>
-          <a href="#capture" className="text-muted-foreground hover:text-foreground">
+          <a href="#capture" className="text-muted-foreground transition-colors hover:text-foreground">
             Get in touch
           </a>
           <Link
             to="/admin"
-            className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent"
+            className="inline-flex items-center gap-1 rounded-full border border-border/50 bg-card/50 px-4 py-1.5 text-sm font-semibold text-foreground backdrop-blur-sm transition-all hover:bg-accent hover:border-accent-foreground/20"
           >
             Admin
           </Link>
         </nav>
       </div>
-    </header>
+    </motion.header>
   );
 }
 
 function Hero() {
   return (
     <section className="hero-bg relative overflow-hidden">
-      <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-success" />
+      <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32 lg:py-40">
+        <motion.div 
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+          className="mx-auto max-w-3xl text-center"
+        >
+          <motion.span variants={fadeUp} className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary">
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex size-2 rounded-full bg-primary"></span>
+            </span>
             New — built for the way small teams sell
-          </span>
-          <h1 className="mt-6 text-5xl leading-[1.05] text-foreground sm:text-7xl">
+          </motion.span>
+          
+          <motion.h1 variants={fadeUp} className="mt-8 text-5xl font-extrabold tracking-tight text-foreground sm:text-7xl">
             Capture leads.
             <br />
-            <em className="not-italic text-primary">Close them faster.</em>
-          </h1>
-          <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
+            <em className="not-italic text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Close them faster.</em>
+          </motion.h1>
+          
+          <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground sm:text-xl">
             LeadDesk Mini turns visitors into qualified conversations. A polished landing form on
             the front, a focused admin desk on the back. Nothing else.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <a
+          </motion.p>
+          
+          <motion.div variants={fadeUp} className="mt-10 flex flex-wrap justify-center gap-4">
+            <motion.a
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               href="#capture"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-elevated transition-transform hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-elevated transition-colors hover:bg-primary/90"
             >
               Talk to sales
               <ArrowRight className="size-4" />
-            </a>
-            <Link
-              to="/admin"
-              className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground hover:bg-accent"
-            >
-              Open admin dashboard
-            </Link>
-          </div>
-        </div>
+            </motion.a>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                to="/admin"
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-card/50 backdrop-blur-sm px-6 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
+              >
+                Open admin dashboard
+              </Link>
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );
@@ -130,19 +169,30 @@ function Features() {
     },
   ];
   return (
-    <section id="features" className="border-y border-border/60 bg-card/40">
-      <div className="mx-auto max-w-6xl px-6 py-20">
-        <div className="grid gap-8 sm:grid-cols-3">
+    <section id="features" className="border-y border-border/30 bg-card/20 relative z-10">
+      <div className="mx-auto max-w-6xl px-6 py-24">
+        <motion.div 
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          className="grid gap-8 sm:grid-cols-3"
+        >
           {items.map(({ icon: Icon, title, body }) => (
-            <div key={title} className="rounded-2xl border border-border bg-card p-6">
-              <div className="grid size-10 place-items-center rounded-lg bg-primary/10 text-primary">
-                <Icon className="size-5" />
+            <motion.div 
+              key={title} 
+              variants={fadeUp}
+              whileHover={{ y: -5, transition: { duration: 0.2 } }}
+              className="group rounded-3xl border border-border/50 bg-card/60 backdrop-blur-md p-8 shadow-sm transition-all hover:shadow-elevated hover:border-primary/30"
+            >
+              <div className="grid size-12 place-items-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                <Icon className="size-6" />
               </div>
-              <h3 className="mt-4 text-xl text-foreground">{title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{body}</p>
-            </div>
+              <h3 className="mt-6 text-xl font-semibold text-foreground">{title}</h3>
+              <p className="mt-3 text-base text-muted-foreground leading-relaxed">{body}</p>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -150,34 +200,52 @@ function Features() {
 
 function LeadFormSection() {
   return (
-    <section id="capture" className="mx-auto max-w-6xl px-6 py-24">
-      <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
-        <div>
-          <h2 className="text-4xl text-foreground sm:text-5xl">
+    <section id="capture" className="relative mx-auto max-w-6xl px-6 py-32">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-background to-background"></div>
+      <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
+        <motion.div 
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+        >
+          <h2 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-6xl">
             Tell us about your project.
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-6 text-xl leading-relaxed text-muted-foreground">
             Share a few details and someone on our team will follow up within one business day.
             No newsletters, no drip campaigns — just a real conversation.
           </p>
-          <ul className="mt-8 space-y-3 text-sm text-muted-foreground">
+          <ul className="mt-10 space-y-4 text-base font-medium text-foreground/80">
             {[
               "Human reply within 1 business day",
               "No automated follow-ups",
               "We only use your info to reply to this inquiry",
             ].map((t) => (
-              <li key={t} className="flex items-start gap-2">
-                <CheckCircle2 className="mt-0.5 size-4 text-success" />
+              <li key={t} className="flex items-center gap-3">
+                <div className="flex size-6 items-center justify-center rounded-full bg-success/20">
+                  <CheckCircle2 className="size-4 text-success" />
+                </div>
                 {t}
               </li>
             ))}
           </ul>
-        </div>
-        <LeadForm />
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
+        >
+          <LeadForm />
+        </motion.div>
       </div>
     </section>
   );
 }
+
+import { Turnstile } from "@marsidev/react-turnstile";
 
 function LeadForm() {
   const [submitted, setSubmitted] = useState(false);
@@ -185,10 +253,11 @@ function LeadForm() {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreateLeadInput>({
     resolver: zodResolver(createLeadSchema),
-    defaultValues: { name: "", email: "", budget: undefined as unknown as CreateLeadInput["budget"], message: "" },
+    defaultValues: { name: "", email: "", budget: undefined as unknown as CreateLeadInput["budget"], message: "", turnstileToken: "" },
   });
 
   const onSubmit = async (values: CreateLeadInput) => {
@@ -210,103 +279,149 @@ function LeadForm() {
     }
   };
 
-  if (submitted) {
-    return (
-      <div className="rounded-2xl border border-border bg-card p-8 shadow-elevated">
-        <div className="grid size-12 place-items-center rounded-full bg-success/10 text-success">
-          <CheckCircle2 className="size-6" />
-        </div>
-        <h3 className="mt-4 text-2xl text-foreground">Message received</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          We've logged your inquiry and someone will reach out shortly.
-        </p>
-        <button
-          type="button"
-          onClick={() => setSubmitted(false)}
-          className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-        >
-          Submit another response
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      noValidate
-      className="rounded-2xl border border-border bg-card p-6 shadow-elevated sm:p-8"
-    >
-      <div className="space-y-5">
-        <Field label="Name" error={errors.name?.message} htmlFor="name">
-          <input
-            id="name"
-            type="text"
-            autoComplete="name"
-            {...register("name")}
-            className="input"
-            placeholder="Ada Lovelace"
-          />
-        </Field>
-        <Field label="Work email" error={errors.email?.message} htmlFor="email">
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            {...register("email")}
-            className="input"
-            placeholder="ada@company.com"
-          />
-        </Field>
-        <Field label="Budget range" error={errors.budget?.message} htmlFor="budget">
-          <select id="budget" {...register("budget")} className="input" defaultValue="">
-            <option value="" disabled>
-              Select a range
-            </option>
-            {BUDGET_RANGES.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="How can we help?" error={errors.message?.message} htmlFor="message">
-          <textarea
-            id="message"
-            rows={4}
-            {...register("message")}
-            className="input resize-none"
-            placeholder="A few sentences about the project, timeline, and goals."
-          />
-        </Field>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
-        >
-          {isSubmitting ? "Sending…" : "Send message"}
-          {!isSubmitting && <ArrowRight className="size-4" />}
-        </button>
-      </div>
+    <div className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-card/80 p-1 shadow-elevated backdrop-blur-xl">
+      <AnimatePresence mode="wait">
+        {submitted ? (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.4 }}
+            className="flex h-full min-h-[400px] flex-col items-center justify-center p-10 text-center"
+          >
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", bounce: 0.5, delay: 0.2 }}
+              className="grid size-20 place-items-center rounded-full bg-success/10 text-success mb-6"
+            >
+              <CheckCircle2 className="size-10" />
+            </motion.div>
+            <h3 className="text-3xl font-bold text-foreground">Message received</h3>
+            <p className="mt-4 text-lg text-muted-foreground">
+              We've logged your inquiry and someone will reach out shortly.
+            </p>
+            <button
+              type="button"
+              onClick={() => setSubmitted(false)}
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-secondary px-5 py-2.5 text-sm font-semibold text-secondary-foreground transition-colors hover:bg-secondary/80"
+            >
+              Submit another response
+            </button>
+          </motion.div>
+        ) : (
+          <motion.form
+            key="form"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onSubmit={handleSubmit(onSubmit)}
+            noValidate
+            className="rounded-[1.75rem] bg-card p-8 sm:p-10"
+          >
+            <div className="space-y-6">
+              <Field label="Name" error={errors.name?.message} htmlFor="name">
+                <input
+                  id="name"
+                  type="text"
+                  autoComplete="name"
+                  {...register("name")}
+                  className="input"
+                  placeholder="Ada Lovelace"
+                />
+              </Field>
+              <Field label="Work email" error={errors.email?.message} htmlFor="email">
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  {...register("email")}
+                  className="input"
+                  placeholder="ada@company.com"
+                />
+              </Field>
+              <Field label="Budget range" error={errors.budget?.message} htmlFor="budget">
+                <div className="relative">
+                  <select id="budget" {...register("budget")} className="input appearance-none" defaultValue="">
+                    <option value="" disabled>
+                      Select a range
+                    </option>
+                    {BUDGET_RANGES.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-muted-foreground">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
+                </div>
+              </Field>
+              <Field label="How can we help?" error={errors.message?.message} htmlFor="message">
+                <textarea
+                  id="message"
+                  rows={4}
+                  {...register("message")}
+                  className="input resize-none"
+                  placeholder="A few sentences about the project, timeline, and goals."
+                />
+              </Field>
 
-      <style>{`
-        .input {
-          width: 100%;
-          border-radius: var(--radius-md);
-          border: 1px solid var(--color-input);
-          background: var(--color-background);
-          color: var(--color-foreground);
-          padding: 0.65rem 0.85rem;
-          font-size: 0.925rem;
-          transition: border-color 120ms, box-shadow 120ms;
-        }
-        .input:focus {
-          outline: none;
-          border-color: var(--color-ring);
-          box-shadow: 0 0 0 3px oklch(from var(--color-ring) l c h / 0.2);
-        }
-      `}</style>
-    </form>
+              {import.meta.env.VITE_TURNSTILE_SITE_KEY && (
+                <div className="py-2">
+                  <Turnstile 
+                    siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} 
+                    onSuccess={(token) => setValue("turnstileToken", token)} 
+                  />
+                  {errors.turnstileToken && <p className="text-sm text-destructive mt-1">{errors.turnstileToken.message}</p>}
+                </div>
+              )}
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                disabled={isSubmitting}
+                className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-4 text-base font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90 disabled:opacity-60"
+              >
+                {isSubmitting ? "Sending…" : "Send message"}
+                {!isSubmitting && <ArrowRight className="size-5" />}
+              </motion.button>
+            </div>
+
+            <style>{`
+              .input {
+                width: 100%;
+                border-radius: var(--radius-lg);
+                border: 2px solid transparent;
+                background: var(--color-background);
+                color: var(--color-foreground);
+                padding: 0.85rem 1rem;
+                font-size: 0.95rem;
+                font-weight: 500;
+                transition: all 200ms ease;
+                box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) inset;
+              }
+              .input:hover {
+                background: var(--color-accent);
+              }
+              .input:focus {
+                outline: none;
+                background: var(--color-background);
+                border-color: var(--color-primary);
+                box-shadow: 0 0 0 4px oklch(from var(--color-primary) l c h / 0.15);
+              }
+              .input::placeholder {
+                color: var(--color-muted-foreground);
+                opacity: 0.7;
+              }
+            `}</style>
+          </motion.form>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -322,26 +437,35 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-foreground">
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+      <label htmlFor={htmlFor} className="mb-2 block text-sm font-semibold text-foreground/90">
         {label}
       </label>
       {children}
-      {error ? (
-        <p role="alert" className="mt-1.5 text-xs font-medium text-destructive">
-          {error}
-        </p>
-      ) : null}
-    </div>
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, height: 0, mt: 0 }}
+            animate={{ opacity: 1, height: "auto", mt: 8 }}
+            exit={{ opacity: 0, height: 0, mt: 0 }}
+            className="text-sm font-medium text-destructive"
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
 function SiteFooter() {
   return (
-    <footer className="border-t border-border/60 bg-card/40">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
-        <p>© {new Date().getFullYear()} LeadDesk Mini</p>
-        <p>Built with TanStack Start · Lovable Cloud</p>
+    <footer className="border-t border-border/40 bg-background/40 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-10 text-sm font-medium text-muted-foreground sm:flex-row">
+        <p>© {new Date().getFullYear()} LeadDesk Mini. All rights reserved.</p>
+        <p className="flex items-center gap-1">
+          Built with <span className="text-foreground">TanStack Start</span>
+        </p>
       </div>
     </footer>
   );

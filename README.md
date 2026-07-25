@@ -1,163 +1,126 @@
 # LeadDesk Mini
 
-A production-quality lead-capture mini-app: a polished public landing page with a
-validated form, and an authenticated admin dashboard for triaging leads.
-
-Built on the modern TanStack Start + Lovable Cloud (Supabase) stack.
+A crisp landing page and admin desk for capturing, qualifying, and closing inbound leads. Built for small teams that ship, LeadDesk Mini provides an end-to-end type-safe solution from the client form straight to the database.
 
 ## Features
 
-- **Public landing page** with hero, features, and lead-capture form
-- **Client + server validation** with a shared Zod schema
-- **REST endpoint** `POST /api/public/leads` for programmatic submissions
-- **Authenticated admin dashboard** at `/admin` (email/password sign in)
-  - Search by name, email, or budget (partial matching)
-  - Status filter and per-row status dropdown (New → Contacted → Closed)
-  - Optimistic UI updates via React Query
-  - Dashboard statistics + CSV export
-- **RLS-protected data**: anonymous users can only INSERT leads; only signed-in
-  users can list/update them
-- **Toast notifications**, loading + empty + error states, accessible forms
+- **Public Landing Page**: A beautifully designed, typography-forward landing page with glassmorphism aesthetics and Framer Motion animations.
+- **Lead Submission Form**: Client-side and server-side validated form to capture inbound leads.
+- **Admin Dashboard**: A secure back-office view for team members to read and manage leads.
+- **Search & Filter**: Find specific leads quickly.
+- **Status Management**: Update the lifecycle status of a lead (New, Contacted, Closed) with one click.
+- **Robust Security**: Supabase Row Level Security (RLS) protects admin data from public exposure.
 
-## Tech stack
+## Tech Stack
 
-| Concern | Tech |
-| --- | --- |
-| Framework | TanStack Start v1 (React 19, Vite 7) |
-| Language | TypeScript (strict) |
-| Styling | Tailwind CSS v4 with semantic OKLCH design tokens |
-| Data | Lovable Cloud (Supabase Postgres + Auth) |
-| Server RPC | `createServerFn` + `requireSupabaseAuth` middleware |
-| HTTP API | TanStack file routes under `src/routes/api/public/*` |
-| Validation | Zod + React Hook Form |
-| Data fetching | @tanstack/react-query |
-| UI polish | sonner, lucide-react, date-fns |
+- **Frontend**: React 19, Tailwind CSS v4, Framer Motion, Radix UI (shadcn/ui components).
+- **Framework**: TanStack Start & TanStack Router for fast, SSR-capable routing and data-loading.
+- **Backend**: Supabase (PostgreSQL) integrated natively via `@supabase/ssr` and TanStack Server Functions.
+- **Validation**: Zod (end-to-end type safety shared between client and server).
+- **Testing**: Vitest for unit and integration testing of validation logic.
+- **Deployment**: Vercel/Netlify for the web application, Supabase for the database.
 
-## Architecture
+## Folder Structure
 
-```
-Browser ──► Landing form ──► POST /api/public/leads ──► anon Supabase client
-                                                        │
-                                                    RLS INSERT
-                                                        ▼
-                                                   public.leads
-                                                        ▲
-                                             RLS SELECT/UPDATE
-                                                        │
-Browser ──► /admin (auth-gated) ──► listLeads / updateLeadStatus
-                                     (createServerFn + requireSupabaseAuth)
+```text
+leaddesk-mini/
+├── src/
+│   ├── components/ui/       # Reusable shadcn/ui components
+│   ├── lib/                 # Shared utilities and Zod schemas
+│   ├── routes/              # TanStack Router file-based routing
+│   │   ├── __root.tsx       # Root layout
+│   │   ├── index.tsx        # Public landing page
+│   │   └── admin/           # Admin dashboard routes
+│   └── utils/supabase/      # Supabase SSR client utilities
+├── supabase/
+│   └── migrations/          # PostgreSQL schema and RLS policies
+├── tests/                   # Vitest validation test suites
+└── docs/                    # Architectural and API documentation
 ```
 
-- **Public write path** uses a publishable-key Supabase client on the server,
-  behind Zod validation. Only INSERT is granted to `anon`.
-- **Admin read/write** goes through authenticated server functions. The client
-  bearer token is attached automatically by `attachSupabaseAuth` (registered in
-  `src/start.ts`), and validated server-side by `requireSupabaseAuth`.
+## Installation
 
-## Folder structure
-
-```
-src/
-  routes/
-    __root.tsx              # global shell, head metadata, Toaster
-    index.tsx               # public landing page + capture form
-    auth.tsx                # sign in / sign up
-    admin.tsx               # admin dashboard (auth-gated in component)
-    api/public/leads.ts     # POST /api/public/leads
-  lib/
-    lead-schemas.ts         # shared Zod schemas + types
-    leads.functions.ts      # authenticated server functions
-  integrations/supabase/    # generated Cloud client + auth middleware
-  styles.css                # Tailwind v4 theme tokens
-```
-
-## Database schema
-
-```sql
-CREATE TYPE lead_status  AS ENUM ('New', 'Contacted', 'Closed');
-CREATE TYPE budget_range AS ENUM ('<$1k','$1k-$5k','$5k-$25k','$25k-$100k','$100k+');
-
-CREATE TABLE public.leads (
-  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name       TEXT NOT NULL,
-  email      TEXT NOT NULL,
-  budget     budget_range NOT NULL,
-  message    TEXT NOT NULL,
-  status     lead_status NOT NULL DEFAULT 'New',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-```
-
-RLS policies:
-- `anon, authenticated` can `INSERT`
-- Only `authenticated` can `SELECT` and `UPDATE`
-
-An `updated_at` trigger keeps the column fresh on every update.
-
-## API reference
-
-### `POST /api/public/leads` — public
-
-Request:
-```json
-{
-  "name": "Ada Lovelace",
-  "email": "ada@example.com",
-  "budget": "$5k-$25k",
-  "message": "We'd like to discuss a pilot."
-}
-```
-
-Responses:
-- `201 Created` → `{ "ok": true, "id": "...", "created_at": "..." }`
-- `400 Bad Request` → invalid JSON body
-- `422 Unprocessable Entity` → `{ "error": "Validation failed", "issues": [...] }`
-- `500 Internal Server Error` → database write failed
-
-### `listLeads()` — authenticated server fn
-Returns `Lead[]` ordered by newest first.
-
-### `updateLeadStatus({ id, status })` — authenticated server fn
-Updates a single lead's status; returns the updated row.
-
-## First-time admin setup
-
-1. Open `/auth`, choose **Create account**, register with an email + password.
-2. Sign in and open `/admin`.
-
-By default Lovable Cloud requires email confirmation. In the Cloud dashboard
-(**Users → Authentication Settings**) you can disable that for development.
-
-## Local development
-
+### 1. Clone the repository
 ```bash
-bun install
-bun run dev
+git clone https://github.com/your-username/leaddesk-mini.git
+cd leaddesk-mini
 ```
 
-The app runs at http://localhost:8080. Environment variables for Lovable Cloud
-are auto-populated in `.env` when the integration is enabled.
+### 2. Install dependencies
+```bash
+npm install
+```
+
+### 3. Configure environment variables
+Create a `.env` file in the root directory and add your Supabase credentials:
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+### 4. Run database migrations
+Use the Supabase CLI to push the schema to your remote database or local instance:
+```bash
+supabase db push
+```
+
+### 5. Start the development server
+```bash
+npm run dev
+```
+The application will be available at `http://localhost:5173`.
+
+## Environment Variables
+
+| Variable | Description |
+|---|---|
+| `VITE_SUPABASE_URL` | The REST URL for your Supabase project. Required by the client and server to interact with the database. |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | The public anon key for Supabase. Safe to expose to the browser. Used for public lead submission. |
+| `SUPABASE_SERVICE_ROLE_KEY` | The secret admin key for Supabase. **Never expose this to the browser**. Used securely on the server for admin tasks. |
+
+## Database Schema
+
+The core of the application relies on the `leads` table in PostgreSQL.
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | `UUID` | Primary key, automatically generated. |
+| `name` | `TEXT` | The submitter's full name. |
+| `email` | `TEXT` | The submitter's email address. |
+| `budget` | `ENUM` | Budget range (e.g., '<$1k', '$1k-$5k'). |
+| `message` | `TEXT` | The inquiry details. |
+| `status` | `ENUM` | Current lifecycle state: 'New', 'Contacted', or 'Closed'. |
+| `created_at` | `TIMESTAMPTZ` | Timestamp of submission. |
+| `updated_at` | `TIMESTAMPTZ` | Timestamp of the last status update, managed via DB triggers. |
+
+### Security (RLS)
+- **Insert**: Allowed for `anon` (public visitors) and `authenticated` users.
+- **Select / Update**: Restricted strictly to `authenticated` administrative users.
+
+## Testing
+
+The project uses **Vitest** for isolated testing of shared validation and business logic.
+
+- **Run tests once**: `npm run test` or `npx vitest run`
+- **Run tests in watch mode**: `npx vitest`
+
+**Coverage Goals**: We aim for 100% coverage on all Zod schema validation (happy paths, boundary conditions, and explicit failure cases like missing fields and invalid emails).
 
 ## Deployment
 
-This project deploys from Lovable — click **Publish** in the editor. Lovable
-Cloud automatically provisions the database, runs migrations, and exposes both
-the static assets and TanStack server routes/functions.
+### Frontend Deployment
+The application is built on Vite and TanStack Start, making it highly compatible with Vercel, Netlify, or Cloudflare Pages.
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist` (or `.output` depending on your Nitro preset).
+Ensure that the `VITE_SUPABASE_*` environment variables are securely injected into your deployment platform.
 
-Backend changes deploy immediately; frontend changes go live when you click
-Publish → Update.
+### Database Deployment
+The database should be deployed using Supabase. The schema is tracked in `supabase/migrations/` and can be deployed via CI/CD using GitHub Actions and the Supabase CLI:
+```bash
+supabase link --project-ref your-project-ref
+supabase db push
+```
 
-## Security notes
-
-- All user input is validated with Zod on both client and server.
-- SQL injection is prevented by using the Supabase client (parameterised).
-- RLS enforces that `anon` can only INSERT — never read or modify leads.
-- Admin access is gated behind Supabase Auth; server functions verify the
-  bearer JWT via `requireSupabaseAuth`.
-- The service-role key is never bundled to the client.
-- No secrets are checked into source; the generated `.env` is git-ignored.
-
-## License
-
-MIT
+---
+*For a deeper dive into the API design and engineering trade-offs, please see the `docs/` folder.*

@@ -4,15 +4,34 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { updateLeadStatusSchema, type Lead } from "./lead-schemas";
 
+import { z } from "zod";
+
+const listLeadsSchema = z.object({
+  page: z.number().min(1).default(1).optional(),
+  limit: z.number().min(1).max(100).default(50).optional(),
+});
+
 export const listLeads = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<Lead[]> => {
-    const { data, error } = await context.supabase
+  .validator((input: unknown) => listLeadsSchema.parse(input || {}))
+  .handler(async ({ data, context }): Promise<{ leads: Lead[]; total: number }> => {
+    const page = data.page || 1;
+    const limit = data.limit || 50;
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    const { data: leads, error, count } = await context.supabase
       .from("leads")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
-    return (data ?? []) as Lead[];
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(from, to);
+      
+    if (error) {
+      import("@sentry/node").then((Sentry) => Sentry.captureException(error));
+      throw new Error(error.message);
+    }
+    
+    return { leads: (leads ?? []) as Lead[], total: count ?? 0 };
   });
 
 export const updateLeadStatus = createServerFn({ method: "POST" })
