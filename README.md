@@ -7,12 +7,13 @@
   ![Vite](https://img.shields.io/badge/Vite-5.0-purple?style=for-the-badge&logo=vite)
   ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=for-the-badge&logo=tailwind-css)
   ![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=for-the-badge&logo=supabase)
+  ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 </div>
 
 <br/>
 
-**🚀 Deployed Application**: [Link to Vercel/Netlify Deployment Here]  
-**🎥 Loom Walkthrough**: [Link to Loom Video Here]  
+**🚀 Deployed Application**: [View Live Application](https://lead-desk-mini-ixio0hqhd-harshalvidhate91-gmailcoms-projects.vercel.app)  
+**🎥 Loom Walkthrough**: *(Coming Soon)*  
 
 ### 🔑 Test Credentials
 To evaluate the Admin Dashboard, please use the following credentials:
