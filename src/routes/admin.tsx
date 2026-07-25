@@ -59,7 +59,7 @@ function Dashboard({ email }: { email: string | null }) {
   const [page, setPage] = useState(1);
   const limit = 50;
 
-  const { data: response, isLoading, isError, refetch } = useQuery({
+  const { data: response, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["leads", page],
     queryFn: () => fetchLeads({ data: { page, limit } }),
   });
@@ -192,8 +192,9 @@ function Dashboard({ email }: { email: string | null }) {
             <div className="p-10 text-center text-sm text-muted-foreground">Loading leads…</div>
           ) : isError ? (
             <div className="p-10 text-center text-sm text-destructive">
-              Couldn't load leads.{" "}
-              <button onClick={() => refetch()} className="underline">
+              Couldn't load leads. {error instanceof Error ? error.message : String(error)}
+              <br />
+              <button onClick={() => refetch()} className="underline mt-2">
                 Retry
               </button>
             </div>
