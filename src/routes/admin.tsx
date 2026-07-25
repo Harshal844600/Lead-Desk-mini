@@ -148,7 +148,7 @@ function Dashboard({ email }: { email: string | null }) {
       </header>
 
       <main className="mx-auto max-w-7xl px-6 py-8">
-        <div className="mb-6 grid gap-4 sm:grid-cols-4">
+        <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
           <StatCard label="Total" value={stats.total} />
           <StatCard label="New" value={stats.New} tone="new" />
           <StatCard label="Contacted" value={stats.Contacted} tone="contacted" />

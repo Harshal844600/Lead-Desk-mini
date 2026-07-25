@@ -77,11 +77,11 @@ function SiteHeader() {
           </motion.span>
           <span className="text-lg font-semibold tracking-tight">LeadDesk</span>
         </Link>
-        <nav className="flex items-center gap-6 text-sm font-medium">
-          <a href="#features" className="text-muted-foreground transition-colors hover:text-foreground">
+        <nav className="flex items-center gap-4 text-sm font-medium sm:gap-6">
+          <a href="#features" className="hidden text-muted-foreground transition-colors hover:text-foreground sm:inline-block">
             Features
           </a>
-          <a href="#capture" className="text-muted-foreground transition-colors hover:text-foreground">
+          <a href="#capture" className="hidden text-muted-foreground transition-colors hover:text-foreground sm:inline-block">
             Get in touch
           </a>
           <Link
@@ -99,7 +99,7 @@ function SiteHeader() {
 function Hero() {
   return (
     <section className="hero-bg relative overflow-hidden">
-      <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32 lg:py-40">
+      <div className="mx-auto max-w-6xl px-6 py-16 sm:py-24 lg:py-40">
         <motion.div 
           variants={staggerContainer}
           initial="hidden"
@@ -176,7 +176,7 @@ function Features() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="grid gap-8 sm:grid-cols-3"
+          className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
         >
           {items.map(({ icon: Icon, title, body }) => (
             <motion.div 
@@ -200,7 +200,7 @@ function Features() {
 
 function LeadFormSection() {
   return (
-    <section id="capture" className="relative mx-auto max-w-6xl px-6 py-32">
+    <section id="capture" className="relative mx-auto max-w-6xl px-6 py-16 lg:py-32">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-background to-background"></div>
       <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
         <motion.div 
@@ -319,7 +319,7 @@ function LeadForm() {
             exit={{ opacity: 0 }}
             onSubmit={handleSubmit(onSubmit)}
             noValidate
-            className="rounded-[1.75rem] bg-card p-8 sm:p-10"
+            className="rounded-[1.75rem] bg-card p-6 sm:p-10"
           >
             <div className="space-y-6">
               <Field label="Name" error={errors.name?.message} htmlFor="name">
