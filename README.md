@@ -1,5 +1,15 @@
 # LeadDesk Mini
 
+**🚀 Deployed Application**: [Link to Vercel/Netlify Deployment Here]  
+**🎥 Loom Walkthrough**: [Link to Loom Video Here]  
+
+### Test Credentials
+To evaluate the Admin Dashboard, please use the following credentials:
+- **Email**: `your_email@example.com` (Replace with your actual admin email)
+- **Password**: `your_password_here` (Replace with your actual password)
+
+---
+
 A crisp landing page and admin desk for capturing, qualifying, and closing inbound leads. Built for small teams that ship, LeadDesk Mini provides an end-to-end type-safe solution from the client form straight to the database.
 
 ## Features
