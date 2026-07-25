@@ -1,59 +1,81 @@
-# LeadDesk Mini
+<div align="center">
+  <h1>🚀 LeadDesk Mini</h1>
+  <p><strong>A crisp landing page and secure admin desk for capturing, qualifying, and closing inbound leads.</strong></p>
+  
+  ![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)
+  ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)
+  ![Vite](https://img.shields.io/badge/Vite-5.0-purple?style=for-the-badge&logo=vite)
+  ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=for-the-badge&logo=tailwind-css)
+  ![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=for-the-badge&logo=supabase)
+</div>
+
+<br/>
 
 **🚀 Deployed Application**: [Link to Vercel/Netlify Deployment Here]  
 **🎥 Loom Walkthrough**: [Link to Loom Video Here]  
 
-### Test Credentials
+### 🔑 Test Credentials
 To evaluate the Admin Dashboard, please use the following credentials:
-- **Email**: `your_email@example.com` (Replace with your actual admin email)
-- **Password**: `your_password_here` (Replace with your actual password)
+- **Email**: `harshalvidhate91@gmail.com`
+- **Password**: `HRv@5805`
 
 ---
 
-A crisp landing page and admin desk for capturing, qualifying, and closing inbound leads. Built for small teams that ship, LeadDesk Mini provides an end-to-end type-safe solution from the client form straight to the database.
+## 📖 Table of Contents
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Tech Stack](#-tech-stack)
+- [Architecture & Security](#-architecture--security)
+- [Getting Started](#-getting-started)
+- [Database Schema](#-database-schema)
+- [Testing](#-testing)
 
-## Features
+---
 
-- **Public Landing Page**: A beautifully designed, typography-forward landing page with glassmorphism aesthetics and Framer Motion animations.
-- **Lead Submission Form**: Client-side and server-side validated form to capture inbound leads.
-- **Admin Dashboard**: A secure back-office view for team members to read and manage leads.
-- **Search & Filter**: Find specific leads quickly.
+## 🌟 Overview
+
+Built for small teams that ship, LeadDesk Mini provides an end-to-end type-safe solution from the client form straight to the database. It combines a visually stunning, conversion-optimized public landing page with a secure, highly functional back-office dashboard.
+
+## ✨ Key Features
+
+- **Public Landing Page**: A beautifully designed, typography-forward landing page with glassmorphism aesthetics, dynamic hover states, and smooth Framer Motion animations.
+- **Lead Submission Form**: End-to-end type-safe form using Zod. Validates on the client for instant feedback, and strictly validates on the server to prevent bad data.
+- **Admin Dashboard**: A secure back-office view for team members to read and manage leads. Built with optimistic UI updates via TanStack Query for a lightning-fast experience.
+- **Search & Filter**: Find specific leads quickly using real-time filtering and status segmentation.
 - **Status Management**: Update the lifecycle status of a lead (New, Contacted, Closed) with one click.
-- **Robust Security**: Supabase Row Level Security (RLS) protects admin data from public exposure.
+- **Team Management**: Invite coworkers and grant them Admin access directly from the UI using secure PostgreSQL `SECURITY DEFINER` functions.
+- **Robust Security**: Supabase Row Level Security (RLS) protects all data from public exposure, ensuring only verified Admins can view or mutate records.
 
-## Tech Stack
+---
+
+## 🛠 Tech Stack
 
 - **Frontend**: React 19, Tailwind CSS v4, Framer Motion, Radix UI (shadcn/ui components).
 - **Framework**: TanStack Start & TanStack Router for fast, SSR-capable routing and data-loading.
-- **Backend**: Supabase (PostgreSQL) integrated natively via `@supabase/ssr` and TanStack Server Functions.
+- **Backend**: Supabase (PostgreSQL) integrated natively via `@supabase/ssr`.
+- **API Layer**: TanStack Server Functions for secure, zero-API-boilerplate backend logic.
 - **Validation**: Zod (end-to-end type safety shared between client and server).
 - **Testing**: Vitest for unit and integration testing of validation logic.
-- **Deployment**: Vercel/Netlify for the web application, Supabase for the database.
+- **Deployment**: Vercel for the web application, Supabase for the database.
 
-## Folder Structure
+---
 
-```text
-leaddesk-mini/
-├── src/
-│   ├── components/ui/       # Reusable shadcn/ui components
-│   ├── lib/                 # Shared utilities and Zod schemas
-│   ├── routes/              # TanStack Router file-based routing
-│   │   ├── __root.tsx       # Root layout
-│   │   ├── index.tsx        # Public landing page
-│   │   └── admin/           # Admin dashboard routes
-│   └── utils/supabase/      # Supabase SSR client utilities
-├── supabase/
-│   └── migrations/          # PostgreSQL schema and RLS policies
-├── tests/                   # Vitest validation test suites
-└── docs/                    # Architectural and API documentation
-```
+## 🔒 Architecture & Security
 
-## Installation
+LeadDesk Mini takes security seriously. We use a multi-layered approach to ensure data integrity and access control:
+
+1. **Row Level Security (RLS)**: The PostgreSQL database strictly enforces RLS policies. The `leads` table allows anonymous inserts, but completely blocks `SELECT`, `UPDATE`, and `DELETE` queries unless the user is authenticated and holds an `Admin` role in the `user_roles` table.
+2. **Definer Functions**: Team Management is handled via secure `SECURITY DEFINER` RPC functions in Postgres. This allows the application to verify and assign roles without exposing the `auth.users` schema to the client.
+3. **Server-Side Validation**: All incoming data (lead submissions, status updates, team invites) is parsed through Zod schemas on the server before interacting with the database.
+
+---
+
+## 🚀 Getting Started
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/leaddesk-mini.git
-cd leaddesk-mini
+git clone https://github.com/Harshal844600/Lead-Desk-mini.git
+cd Lead-Desk-mini
 ```
 
 ### 2. Install dependencies
@@ -81,15 +103,9 @@ npm run dev
 ```
 The application will be available at `http://localhost:5173`.
 
-## Environment Variables
+---
 
-| Variable | Description |
-|---|---|
-| `VITE_SUPABASE_URL` | The REST URL for your Supabase project. Required by the client and server to interact with the database. |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | The public anon key for Supabase. Safe to expose to the browser. Used for public lead submission. |
-| `SUPABASE_SERVICE_ROLE_KEY` | The secret admin key for Supabase. **Never expose this to the browser**. Used securely on the server for admin tasks. |
-
-## Database Schema
+## 🗄 Database Schema
 
 The core of the application relies on the `leads` table in PostgreSQL.
 
@@ -102,13 +118,14 @@ The core of the application relies on the `leads` table in PostgreSQL.
 | `message` | `TEXT` | The inquiry details. |
 | `status` | `ENUM` | Current lifecycle state: 'New', 'Contacted', or 'Closed'. |
 | `created_at` | `TIMESTAMPTZ` | Timestamp of submission. |
-| `updated_at` | `TIMESTAMPTZ` | Timestamp of the last status update, managed via DB triggers. |
 
-### Security (RLS)
-- **Insert**: Allowed for `anon` (public visitors) and `authenticated` users.
-- **Select / Update**: Restricted strictly to `authenticated` administrative users.
+### Team Management
+- **`user_roles` Table**: Maps `auth.users` IDs to specific roles (e.g., `Admin`).
+- **`is_admin()`**: Postgres function that safely verifies a user's role during RLS evaluation.
 
-## Testing
+---
+
+## 🧪 Testing
 
 The project uses **Vitest** for isolated testing of shared validation and business logic.
 
@@ -116,21 +133,3 @@ The project uses **Vitest** for isolated testing of shared validation and busine
 - **Run tests in watch mode**: `npx vitest`
 
 **Coverage Goals**: We aim for 100% coverage on all Zod schema validation (happy paths, boundary conditions, and explicit failure cases like missing fields and invalid emails).
-
-## Deployment
-
-### Frontend Deployment
-The application is built on Vite and TanStack Start, making it highly compatible with Vercel, Netlify, or Cloudflare Pages.
-- **Build Command**: `npm run build`
-- **Output Directory**: `dist` (or `.output` depending on your Nitro preset).
-Ensure that the `VITE_SUPABASE_*` environment variables are securely injected into your deployment platform.
-
-### Database Deployment
-The database should be deployed using Supabase. The schema is tracked in `supabase/migrations/` and can be deployed via CI/CD using GitHub Actions and the Supabase CLI:
-```bash
-supabase link --project-ref your-project-ref
-supabase db push
-```
-
----
-*For a deeper dive into the API design and engineering trade-offs, please see the `docs/` folder.*
