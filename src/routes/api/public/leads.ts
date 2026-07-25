@@ -112,7 +112,7 @@ export const Route = createFileRoute("/api/public/leads")({
         if (error) {
           console.error("[POST /api/public/leads] insert failed", error);
           Sentry.captureException(error);
-          return json({ error: "Could not save lead" }, 500);
+          return json({ error: "Could not save lead: " + error.message }, 500);
         }
 
         return json({ ok: true, id: data.id, created_at: data.created_at }, 201);
