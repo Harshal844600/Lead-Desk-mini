@@ -88,7 +88,8 @@ export const Route = createFileRoute("/api/public/leads")({
         }
 
         const url = process.env.SUPABASE_URL!;
-        const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
+        // Use service role key to bypass RLS since we validate data on the server
+        const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY!;
         const supabase = createClient<Database>(url, key, {
           auth: { persistSession: false },
           global: {
